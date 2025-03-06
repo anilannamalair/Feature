@@ -1,0 +1,1 @@
+public class FrameworkA { public static void main(String[] args) { System.out.println("Framework A loaded"); } }

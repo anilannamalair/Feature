@@ -1,0 +1,1 @@
+import org.junit.Test; public class ServiceBTest { @Test public void testServiceB() { System.out.println("Service B test"); } }

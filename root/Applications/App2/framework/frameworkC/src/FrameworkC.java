@@ -1,0 +1,1 @@
+public class FrameworkC { public static void main(String[] args) { System.out.println("Framework C loaded"); } }

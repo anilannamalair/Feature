@@ -1,0 +1,1 @@
+public class CoreModule { public static void main(String[] args) { System.out.println("Core Module initialized"); } }

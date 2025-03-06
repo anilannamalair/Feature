@@ -1,0 +1,950 @@
+import React, { useState } from "react";
+import { Bell, TrendingUp, TrendingDown, MinusCircle } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { Card } from "./Card";
+import { Table } from "./Table";
+
+const Dashboard = () => {
+  const [alerts, setAlerts] = useState(2);
+
+  const buildData = [
+    { timeframe: "Last 24h", running: 4, failed: 2, completed: 10, errored: 1 },
+    { timeframe: "Last 7d", running: 20, failed: 5, completed: 50, errored: 3 },
+    { timeframe: "Last 30d", running: 90, failed: 10, completed: 200, errored: 8 },
+  ];
+
+  const jenkinsStatusData = [
+    { metric: "Total Controllers", value: 5, status: "🟢" },
+    { metric: "Active Controllers", value: 3, status: "🟢" },
+    { metric: "Degraded Controllers", value: 1, status: "🟠" },
+    { metric: "Offline Controllers", value: 1, status: "🔴" },
+    { metric: "Total Nodes", value: 10, status: "🟢" },
+    { metric: "Available Nodes", value: 7, status: "🟢" },
+    { metric: "In Use Nodes", value: 2, status: "🟠" },
+    { metric: "Offline Nodes", value: 1, status: "🔴" },
+  ];
+
+  const offlineNodeAlerts = [
+    { nodeName: "Node-01", status: "🔴", lastDowntime: "2h ago", reason: "Disk Full" },
+    { nodeName: "Node-03", status: "🟠", lastDowntime: "1h ago", reason: "High CPU Usage" },
+    { nodeName: "Node-05", status: "🔴", lastDowntime: "30m ago", reason: "Connection Lost" },
+    { nodeName: "Node-08", status: "🟢", lastDowntime: "-", reason: "N/A" },
+    { nodeName: "Node-10", status: "🟢", lastDowntime: "-", reason: "N/A" },
+  ];
+
+  const applicationHealthSummary = [
+    { application: "App-A", status: "🟢 Healthy", successRate: "98%", issues: "None" },
+    { application: "App-B", status: "🟠 Minor Issues", successRate: "85%", issues: "Slow Build" },
+    { application: "App-C", status: "🔴 Failing", successRate: "60%", issues: "Deployment Errors" },
+    { application: "App-D", status: "🟢 Healthy", successRate: "97%", issues: "None" },
+    { application: "App-E", status: "🔴 Failing", successRate: "50%", issues: "Outdated Dependencies" },
+  ];
+
+  const buildMetrics = [
+    { metric: "Running Builds", value: 3, status: "🟠" },
+    { metric: "Successful Builds", value: 40, status: "🟢" },
+    { metric: "Failed Builds", value: 5, status: "🔴" },
+    { metric: "Errored Builds", value: 2, status: "🔴" },
+    { metric: "Avg. Build Time", value: "12 mins", status: "🟢" },
+  ];
+
+  const deploymentMetrics = [
+    { deployment: "Deployment-101", status: "🟢 Success", duration: "10 mins", failureReason: "N/A" },
+    { deployment: "Deployment-102", status: "🔴 Failed", duration: "15 mins", failureReason: "Timeout" },
+    { deployment: "Deployment-103", status: "🟠 Partial", duration: "12 mins", failureReason: "DB Sync Issue" },
+    { deployment: "Deployment-104", status: "🟢 Success", duration: "8 mins", failureReason: "N/A" },
+    { deployment: "Deployment-105", status: "🔴 Failed", duration: "18 mins", failureReason: "Permission Issue" },
+  ];
+
+  const mrExecutionStatus = [
+    { mrId: "MR-001", status: "🟢 Merged", reviewer: "Alice", timeToMerge: "2h" },
+    { mrId: "MR-002", status: "🔴 Failed", reviewer: "Bob", timeToMerge: "-" },
+    { mrId: "MR-003", status: "🟠 In Review", reviewer: "Charlie", timeToMerge: "-" },
+    { mrId: "MR-004", status: "🟢 Merged", reviewer: "David", timeToMerge: "3h" },
+    { mrId: "MR-005", status: "🟢 Merged", reviewer: "Emily", timeToMerge: "1h" },
+  ];
+
+  return (
+    <div className="container py-4">
+      {/* Header Section */}
+      <Card className="mb-4">
+        <div className="d-flex justify-content-between align-items-center">
+          <h1 className="h3">CI/CD Pipeline Dashboard</h1>
+          <div className="d-flex gap-3">
+            <select className="form-select">
+              <option>Date Range</option>
+            </select>
+            <select className="form-select">
+              <option>Application</option>
+            </select>
+            <select className="form-select">
+              <option>Environment</option>
+            </select>
+            <div className="position-relative">
+              <Bell className="cursor-pointer" />
+              {alerts > 0 && (
+                <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                  {alerts}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      </Card>
+<strong>1. Jenkins Status Overview</strong>
+      {/* Jenkins Status Overview */}
+      <div className="row">
+        <div className="col-lg-6">
+          <Card className="mb-4">
+            <h2 className="h5"><strong>✅Jenkins Status Overview</strong></h2>
+            <Table>
+              <thead>
+                <tr>
+                  <th>Metric</th>
+                  <th>Value</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {jenkinsStatusData.map((row, index) => (
+                  <tr key={index}>
+                    <td>{row.metric}</td>
+                    <td>{row.value}</td>
+                    <td>{row.status}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </Card>
+        </div>
+
+        {/* Node Offline Alerts */}
+        <div className="col-lg-6">
+          <Card className="mb-4">
+            <h2 className="h5"><strong>✅Offline Node Alerts</strong></h2>
+            <Table>
+              <thead>
+                <tr>
+                  <th>Node Name</th>
+                  <th>Status</th>
+                  <th>Last Downtime</th>
+                  <th>Reason</th>
+                </tr>
+              </thead>
+              <tbody>
+                {offlineNodeAlerts.map((row, index) => (
+                  <tr key={index}>
+                    <td>{row.nodeName}</td>
+                    <td>{row.status}</td>
+                    <td>{row.lastDowntime}</td>
+                    <td>{row.reason}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </Card>
+        </div>
+      </div>
+
+<strong>2. Application Health Summary</strong>
+      {/* Application Health Summary */}
+      <div className="row">
+        <div className="col-lg-6">
+          <Card className="mb-4">
+            <h2 className="h5"><strong>Application Health Summary</strong></h2>
+            <Table>
+              <thead>
+                <tr>
+                  <th>Application</th>
+                  <th>Status</th>
+                  <th>Success Rate (%)</th>
+                  <th>Issues</th>
+                </tr>
+              </thead>
+              <tbody>
+                {applicationHealthSummary.map((row, index) => (
+                  <tr key={index}>
+                    <td>{row.application}</td>
+                    <td>{row.status}</td>
+                    <td>{row.successRate}</td>
+                    <td>{row.issues}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </Card>
+        </div>
+        
+  <div className="col-md-6">
+    <Card className="mb-4">
+      <h2 className="h5"><strong>✅Service-Level Breakdown (App-B)</strong></h2>
+      <Table>
+        <thead>
+          <tr>
+            <th>Service</th>
+            <th>Status</th>
+            <th>Issue</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Auth Service</td>
+            <td>🟢</td>
+            <td>No Issues</td>
+          </tr>
+          <tr>
+            <td>Payment Service</td>
+            <td>🟠</td>
+            <td>Slow Response</td>
+          </tr>
+          <tr>
+            <td>User Service</td>
+            <td>🔴</td>
+            <td>API Failures</td>
+          </tr>
+          <tr>
+            <td>Notification Service</td>
+            <td>🟢</td>
+            <td>No Issues</td>
+          </tr>
+          <tr>
+            <td>Logging Service</td>
+            <td>🟠</td>
+            <td>High Latency</td>
+          </tr>
+        </tbody>
+      </Table>
+    </Card>
+  
+</div>
+      </div>
+   
+
+
+<strong>3. Build & Deployment Status</strong>
+      {/* Build & Deployment Status */}
+      <div className="row">
+        <div className="col-lg-6">
+          <Card className="mb-4">
+            <h2 className="h5"><strong>✅Build Metrics</strong></h2>
+            <Table>
+              <thead>
+                <tr>
+                  <th>Metric</th>
+                  <th>Value</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {buildMetrics.map((row, index) => (
+                  <tr key={index}>
+                    <td>{row.metric}</td>
+                    <td>{row.value}</td>
+                    <td>{row.status}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </Card>
+        </div>
+
+        <div className="col-lg-6">
+          <Card className="mb-4">
+            <h2 className="h5"><strong>✅Deployment Metrics</strong></h2>
+            <Table>
+              <thead>
+                <tr>
+                  <th>Deployment</th>
+                  <th>Status</th>
+                  <th>Duration</th>
+                  <th>Failure Reason</th>
+                </tr>
+              </thead>
+              <tbody>
+                {deploymentMetrics.map((row, index) => (
+                  <tr key={index}>
+                    <td>{row.deployment}</td>
+                    <td>{row.status}</td>
+                    <td>{row.duration}</td>
+                    <td>{row.failureReason}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </Card>
+        </div>
+      </div>
+
+<div className="row">
+  <div className="col-md-6">
+    <Card className="mb-4">
+      <h2 className="h5"><strong>✅Build Trends (Last 7 Days)</strong></h2>
+      <Table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Success</th>
+            <th>Failed</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Feb 18</td>
+            <td>12</td>
+            <td>2</td>
+          </tr>
+          <tr>
+            <td>Feb 19</td>
+            <td>10</td>
+            <td>3</td>
+          </tr>
+          <tr>
+            <td>Feb 20</td>
+            <td>15</td>
+            <td>1</td>
+          </tr>
+          <tr>
+            <td>Feb 21</td>
+            <td>11</td>
+            <td>4</td>
+          </tr>
+          <tr>
+            <td>Feb 22</td>
+            <td>13</td>
+            <td>2</td>
+          </tr>
+        </tbody>
+      </Table>
+    </Card>
+  </div>
+</div>
+<strong>4. Merge Request (MR) Status</strong>
+      {/* Merge Request Execution Status */}
+      <div className="row">
+        <div className="col-lg-6">
+          <Card className="mb-4">
+            <h2 className="h5"><strong>✅PR/MR Execution Status</strong></h2>
+            <Table>
+              <thead>
+                <tr>
+                  <th>MR ID</th>
+                  <th>Status</th>
+                  <th>Reviewer</th>
+                  <th>Time to Merge</th>
+                </tr>
+              </thead>
+              <tbody>
+                {mrExecutionStatus.map((row, index) => (
+                  <tr key={index}>
+                    <td>{row.mrId}</td>
+                    <td>{row.status}</td>
+                    <td>{row.reviewer}</td>
+                    <td>{row.timeToMerge}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </Card>
+        </div>
+        <div className="col-md-6">
+    <Card className="mb-4">
+      <h2 className="h5"><strong>✅Open vs Merged PRs</strong></h2>
+      <ul>
+        <li><strong>Open PRs:</strong> 8</li>
+        <li><strong>Merged PRs:</strong> 15</li>
+        <li><strong>Longest Open PR:</strong> 3 days</li>
+        <li><strong>Avg PR Review Time:</strong> 2.5h</li>
+      </ul>
+    </Card>
+  </div>
+      </div>
+
+ 
+
+ 
+
+ <strong>5. Base Image Updates</strong>
+<div className="row">
+  <div className="col-md-6">
+    <Card className="mb-4">
+      <h2 className="h5"><strong>✅Base Image Compliance</strong></h2>
+      <Table>
+        <thead>
+          <tr>
+            <th>Application</th>
+            <th>Status</th>
+            <th>Last Updated</th>
+            <th>Compliance</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>App-A</td>
+            <td>🟢 Updated</td>
+            <td>3 days ago</td>
+            <td>✅</td>
+          </tr>
+          <tr>
+            <td>App-B</td>
+            <td>🔴 Outdated</td>
+            <td>20 days ago</td>
+            <td>❌</td>
+          </tr>
+          <tr>
+            <td>App-C</td>
+            <td>🟠 Pending</td>
+            <td>7 days ago</td>
+            <td>❌</td>
+          </tr>
+          <tr>
+            <td>App-D</td>
+            <td>🟢 Updated</td>
+            <td>2 days ago</td>
+            <td>✅</td>
+          </tr>
+          <tr>
+            <td>App-E</td>
+            <td>🔴 Outdated</td>
+            <td>30 days ago</td>
+            <td>❌</td>
+          </tr>
+        </tbody>
+      </Table>
+    </Card>
+  </div>
+  
+  <div className="col-md-6">
+    <Card className="mb-4">
+      <h2 className="h5"><strong>✅Pending Base Image Updates</strong></h2>
+      <Table>
+        <thead>
+          <tr>
+            <th>Service</th>
+            <th>Current Version</th>
+            <th>New Version</th>
+            <th>Compliance</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Auth Service</td>
+            <td>v1.2.3</td>
+            <td>v1.3.0</td>
+            <td>🟢</td>
+          </tr>
+          <tr>
+            <td>Payment Service</td>
+            <td>v2.1.0</td>
+            <td>v2.1.5</td>
+            <td>🟢</td>
+          </tr>
+          <tr>
+            <td>User Service</td>
+            <td>v3.0.1</td>
+            <td>v3.1.0</td>
+            <td>🟠</td>
+          </tr>
+          <tr>
+            <td>Notification Service</td>
+            <td>v1.1.5</td>
+            <td>v1.2.0</td>
+            <td>🔴</td>
+          </tr>
+          <tr>
+            <td>Logging Service</td>
+            <td>v2.0.2</td>
+            <td>v2.0.8</td>
+            <td>🔴</td>
+          </tr>
+        </tbody>
+      </Table>
+    </Card>
+  </div>
+</div>
+
+
+
+ <strong>6. Branch Lock Status Tables</strong>
+<div className="row">
+  {/* Locked Branches Table */}
+  <div className="col-md-6">
+    <Card className="mb-4">
+      <h2 className="h5"><strong>✅Locked Branches</strong></h2>
+      <Table>
+        <thead>
+          <tr>
+            <th>Branch</th>
+            <th>Status</th>
+            <th>Locked By</th>
+            <th>Lock Reason</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>main</td>
+            <td>🔴 Locked</td>
+            <td>Alice</td>
+            <td>Release Lock</td>
+          </tr>
+          <tr>
+            <td>dev</td>
+            <td>🟢 Unlocked</td>
+            <td>Bob</td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>feature-1</td>
+            <td>🔴 Locked</td>
+            <td>Charlie</td>
+            <td>Security Fix</td>
+          </tr>
+          <tr>
+            <td>hotfix-2</td>
+            <td>🟠 Restricted</td>
+            <td>David</td>
+            <td>Review Pending</td>
+          </tr>
+          <tr>
+            <td>staging</td>
+            <td>🔴 Locked</td>
+            <td>Emily</td>
+            <td>Compliance Check</td>
+          </tr>
+        </tbody>
+      </Table>
+    </Card>
+  </div>
+
+  {/* Who Locked/Unlocked & When Table */}
+  <div className="col-md-6">
+    <Card className="mb-4">
+      <h2 className="h5"><strong>✅Who Locked/Unlocked & When</strong></h2>
+      <Table>
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Action</th>
+            <th>Branch</th>
+            <th>Timestamp</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Alice</td>
+            <td>Locked</td>
+            <td>main</td>
+            <td>Feb 22, 10:00 AM</td>
+          </tr>
+          <tr>
+            <td>Bob</td>
+            <td>Unlocked</td>
+            <td>dev</td>
+            <td>Feb 22, 11:30 AM</td>
+          </tr>
+          <tr>
+            <td>Charlie</td>
+            <td>Locked</td>
+            <td>feature-1</td>
+            <td>Feb 21, 3:00 PM</td>
+          </tr>
+          <tr>
+            <td>David</td>
+            <td>Restricted</td>
+            <td>hotfix-2</td>
+            <td>Feb 20, 2:00 PM</td>
+          </tr>
+          <tr>
+            <td>Emily</td>
+            <td>Locked</td>
+            <td>staging</td>
+            <td>Feb 19, 1:00 PM</td>
+          </tr>
+        </tbody>
+      </Table>
+    </Card>
+  </div>
+</div>
+<strong>7.Jenkins Nodes Availability Tables</strong>
+<div className="row">
+  {/* Availability Metrics Table */}
+  <div className="col-md-6">
+    <Card className="mb-4">
+      <h2 className="h5"><strong>✅Availability Metrics</strong></h2>
+      <Table>
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Value</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Available Nodes</td>
+            <td>7</td>
+            <td>🟢</td>
+          </tr>
+          <tr>
+            <td>Offline Nodes</td>
+            <td>3</td>
+            <td>🔴</td>
+          </tr>
+          <tr>
+            <td>Nodes in Auto-Scaling</td>
+            <td>2</td>
+            <td>🟠</td>
+          </tr>
+        </tbody>
+      </Table>
+    </Card>
+  </div>
+
+  {/* Recent Node Failures Table */}
+  <div className="col-md-6">
+    <Card className="mb-4">
+      <h2 className="h5"><strong>✅Recent Node Failures</strong></h2>
+      <Table>
+        <thead>
+          <tr>
+            <th>Node</th>
+            <th>Status</th>
+            <th>Last Failure</th>
+            <th>Reason</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Node-01</td>
+            <td>🔴</td>
+            <td>2h ago</td>
+            <td>Disk Full</td>
+          </tr>
+          <tr>
+            <td>Node-02</td>
+            <td>🟢</td>
+            <td>-</td>
+            <td>N/A</td>
+          </tr>
+          <tr>
+            <td>Node-05</td>
+            <td>🔴</td>
+            <td>30m ago</td>
+            <td>Connection Lost</td>
+          </tr>
+          <tr>
+            <td>Node-07</td>
+            <td>🟠</td>
+            <td>1h ago</td>
+            <td>High CPU Usage</td>
+          </tr>
+          <tr>
+            <td>Node-09</td>
+            <td>🟢</td>
+            <td>-</td>
+            <td>N/A</td>
+          </tr>
+        </tbody>
+      </Table>
+    </Card>
+  </div>
+</div>
+
+{/* Historical Uptime Trends Table */}
+<div className="row">
+  <div className="col-md-12">
+    <Card className="mb-4">
+      <h2 className="h5"><strong>✅Historical Uptime Trends</strong></h2>
+      <Table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Uptime (%)</th>
+            <th>Downtime (%)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Feb 18</td>
+            <td>99%</td>
+            <td>1%</td>
+          </tr>
+          <tr>
+            <td>Feb 19</td>
+            <td>95%</td>
+            <td>5%</td>
+          </tr>
+          <tr>
+            <td>Feb 20</td>
+            <td>92%</td>
+            <td>8%</td>
+          </tr>
+          <tr>
+            <td>Feb 21</td>
+            <td>98%</td>
+            <td>2%</td>
+          </tr>
+          <tr>
+            <td>Feb 22</td>
+            <td>97%</td>
+            <td>3%</td>
+          </tr>
+        </tbody>
+      </Table>
+    </Card>
+  </div>
+</div>
+<strong>8. Sonar Status</strong>
+ {/* Sonar Status by Service Table */}
+ 
+
+ <div className="row">
+        <div className="col-md-6">
+          <Card className="mb-4">
+            <h2 className="h5"><strong>✅Sonar Scan Status</strong></h2>
+            <Table>
+              <thead>
+                <tr>
+                  <th>Application</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>App-01</td>
+                  <td>🟢 Passed</td>
+                </tr>
+                <tr>
+                  <td>App-02</td>
+                  <td>🔴 Failed</td>
+                </tr>
+                <tr>
+                  <td>App-03</td>
+                  <td>🟠 In Progress</td>
+                </tr>
+              </tbody>
+            </Table>
+          </Card>
+        </div>
+        <div className="col-md-6">
+          <Card className="mb-4">
+            <h2 className="h5"><strong>✅Sonar Status (Service Wise)</strong></h2>
+            <Table>
+              <thead>
+                <tr>
+                  <th>Service</th>
+                  <th>Total</th>
+                  <th>Pass</th>
+                  <th>Fail</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Service-01</td>
+                  <td>30</td>
+                  <td>25</td>
+                  <td>5</td>
+                </tr>
+                <tr>
+                  <td>Service-02</td>
+                  <td>20</td>
+                  <td>15</td>
+                  <td>5</td>
+                </tr>
+              </tbody>
+            </Table>
+          </Card>
+        </div>
+        </div>
+
+
+      <strong>9. Blackduck Scan Status</strong>
+{/* Blackduck Scan Status Table */}
+<div className="row">
+        <div className="col-md-6">
+          <Card className="mb-4">
+            <h2 className="h5"><strong>✅Blackduck Scan Status</strong></h2>
+            <Table>
+              <thead>
+                <tr>
+                  <th>Application</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>App-01</td>
+                  <td>🟢 Passed</td>
+                </tr>
+                <tr>
+                  <td>App-02</td>
+                  <td>🔴 Failed</td>
+                </tr>
+                <tr>
+                  <td>App-03</td>
+                  <td>🟠 In Progress</td>
+                </tr>
+              </tbody>
+            </Table>
+          </Card>
+        </div>
+
+        {/* Blackduck Scan Status by Service Table */}
+        <div className="col-md-6">
+          <Card className="mb-4">
+            <h2 className="h5"><strong>✅Blackduck Scan Status (Service Wise)</strong></h2>
+            <Table>
+              <thead>
+                <tr>
+                  <th>Service</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Service-01</td>
+                  <td>🟢 Passed</td>
+                </tr>
+                <tr>
+                  <td>Service-02</td>
+                  <td>🔴 Failed</td>
+                </tr>
+              </tbody>
+            </Table>
+          </Card>
+        </div>
+       <strong>10. Build Issues Count</strong> 
+      </div>
+      {/* Build Issues Count Table */}
+      <div className="row">
+        <div className="col-md-6">
+          <Card className="mb-4">
+            <h2 className="h5"><strong>✅Build Issues Count</strong></h2>
+            <Table>
+              <thead>
+                <tr>
+                  <th>Application</th>
+                  <th>Issues</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>App-01</td>
+                  <td>3</td>
+                </tr>
+                <tr>
+                  <td>App-02</td>
+                  <td>1</td>
+                </tr>
+                <tr>
+                  <td>App-03</td>
+                  <td>0</td>
+                </tr>
+              </tbody>
+            </Table>
+          </Card>
+        </div>
+
+        {/* Build Issues Count by Service Table */}
+        <div className="col-md-6">
+          <Card className="mb-4">
+            <h2 className="h5"><strong>✅Build Issues Count (Service Wise)</strong></h2>
+            <Table>
+              <thead>
+                <tr>
+                  <th>Service</th>
+                  <th>Issues</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Service-01</td> 
+                  <td>1</td>
+                </tr>
+                <tr>
+                  <td>Service-02</td>
+                  <td>0</td>
+                </tr>
+              </tbody>
+            </Table>
+          </Card>
+        </div>
+      </div>
+      <strong>11. Deploy Issues Count</strong>
+        {/* Deploy Issues Count Table */}
+        <div className="row">
+        <div className="col-md-6">
+          <Card className="mb-4">
+            <h2 className="h5"><strong>✅Deploy Issues Count</strong></h2>
+            <Table>
+              <thead>
+                <tr>
+                  <th>Application</th>
+                  <th>Issues</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>App-01</td>
+                  <td>2</td>
+                </tr>
+                <tr>
+                  <td>App-02</td>
+                  <td>0</td>
+                </tr>
+                <tr>
+                  <td>App-03</td>
+                  <td>1</td>
+                </tr>
+              </tbody>
+            </Table>
+          </Card>
+        </div>
+
+        {/* Deploy Issues Count by Service Table */}
+        <div className="col-md-6">
+          <Card className="mb-4">
+            <h2 className="h5"><strong>✅Deploy Issues Count (Service Wise)</strong></h2>
+            <Table>
+              <thead>
+                <tr>
+                  <th>Service</th>
+                  <th>Issues</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Service-01</td>
+                  <td>1</td>
+                </tr>
+                <tr>
+                  <td>Service-02</td>
+                  <td>0</td>
+                </tr>
+              </tbody>
+            </Table>
+          </Card>
+        </div>
+      </div>
+    
+	 {/* Trend Line Chart */}
+      <Card className="col-span-2">
+        <CardContent>
+          <h2 className="text-lg font-semibold">Build and Error Trends</h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={chartData}>
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Line type="monotone" dataKey="builds" stroke="#8884d8" />
+              <Line type="monotone" dataKey="errors" stroke="#ff7300" />
+            </LineChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+  
+    </div>
+  );
+};
+
+export default Dashboard;
