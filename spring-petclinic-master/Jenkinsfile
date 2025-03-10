@@ -3,10 +3,27 @@ import build.buildApplication
 
 pipeline {
     agent any
+    environment {
+        APP_NAME = 'spring-petclinic-master'
+        BUILD_ENV = 'staging'           // Define build environment
+        BUILD_VERSION = '1.0.0'         // Define application version
+    }
+    parameters {
+        string(name: 'CUSTOM_PARAM', defaultValue: 'defaultValue', description: 'Custom parameter for build')
+    }
     stages {
-        stage('Build') {
+        stage('Load Configuration') {
             steps {
-                buildApplication(appName: 'app1')
+                script {
+                    def config = [
+                        appName: env.APP_NAME,
+                        env: env.BUILD_ENV,
+                        version: env.BUILD_VERSION,
+                        customParam: params.CUSTOM_PARAM
+                    ]
+                    echo "🔧 Loaded Config: ${config}"
+                    buildApplication(config) // Passing the config to shared library
+                }
             }
         }
     }
