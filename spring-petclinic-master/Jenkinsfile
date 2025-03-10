@@ -1,4 +1,6 @@
 @Library('jenkins-shared-lib@main') _
+import build.buildApplication
+
 pipeline {
     agent any
     stages {
